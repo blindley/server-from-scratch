@@ -3,9 +3,41 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <string>
+#include <optional>
 
-int main1()
+auto string_to_int(char const* str) -> std::optional<int>
 {
+    try {
+        auto n = std::stoi(str);
+        return n;
+    } catch (...) {
+        return std::nullopt;
+    }
+}
+
+#define DEFAULT_PORT 8080
+int main1(int argc, char** argv)
+{
+    int port = DEFAULT_PORT;
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-p") == 0) {
+            i++;
+            if (i >= argc) {
+                fprintf(stderr, "missing port number\n");
+                return 1;
+            }
+            auto opt_port = string_to_int(argv[i]);
+            if (!opt_port.has_value()) {
+                fprintf(stderr, "invalid port number (%s)\n", argv[i]);
+                return 1;
+            }
+            port = *opt_port;
+        }
+    }
+
+    auto port_string = std::to_string(port);
+
     printf("Configuring local address...\n");
     struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
@@ -14,7 +46,7 @@ int main1()
     hints.ai_flags = AI_PASSIVE;
 
     struct addrinfo* bind_address;
-    getaddrinfo(0, "8080", &hints, &bind_address);
+    getaddrinfo(0, port_string.c_str(), &hints, &bind_address);
 
     printf("Creating socket...\n");
     Socket socket_listen;
@@ -91,13 +123,13 @@ int main1()
     return 0;
 }
 
-int main() {
+int main(int argc, char** argv) {
     if (!Socket::init()) {
         fprintf(stderr, "Failed to initialize socket API!\n");
         return 1;
     }
 
-    int result = main1();
+    int result = main1(argc, argv);
 
     Socket::deInit();
     return result;
