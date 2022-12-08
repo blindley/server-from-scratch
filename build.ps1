@@ -1,1 +1,1 @@
-nmake /nologo /f win32.Makefile
+cmake --build -S . -B ./build/msvc
