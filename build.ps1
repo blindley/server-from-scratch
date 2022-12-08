@@ -1,1 +1,1 @@
-cmake --build -S . -B ./build/msvc
+cmake --build ./build/msvc

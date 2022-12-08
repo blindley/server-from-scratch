@@ -12,7 +12,7 @@
 struct Socket {
     SOCKET socket;
     bool isValid() const { return socket != INVALID_SOCKET; }
-    bool close() { closesocket(socket); }
+    void close() { closesocket(socket); }
     static int getLastError() { return WSAGetLastError(); }
     static bool init() {
         WSADATA d;
