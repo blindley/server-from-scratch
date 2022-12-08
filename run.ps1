@@ -1,1 +1,1 @@
-& ./build/msvc/Debug/http_server.exe $args
+& ./build/windows/Debug/http_server.exe $args
