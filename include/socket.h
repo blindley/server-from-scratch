@@ -9,19 +9,6 @@
 #include <ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 
-struct Socket {
-    SOCKET socket;
-    bool isValid() const { return socket != INVALID_SOCKET; }
-    void close() { closesocket(socket); }
-    static int getLastError() { return WSAGetLastError(); }
-    static bool init() {
-        WSADATA d;
-        return WSAStartup(MAKEWORD(2, 2), &d) == 0;
-    }
-
-    static void deInit() { WSACleanup(); }
-};
-
 #else
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -31,14 +18,36 @@ struct Socket {
 #include <unistd.h>
 #include <errno.h>
 
+#endif
+
 struct Socket {
+#if defined(_WIN32)
+    typedef SOCKET _socket_t;
+    bool isValid() const { return socket != INVALID_SOCKET; }
+    void close() { closesocket(socket); }
+    static int getLastError() { return WSAGetLastError(); }
+
+    static bool init() {
+        WSADATA d;
+        return WSAStartup(MAKEWORD(2, 2), &d) == 0;
+    }
+
+    static void deInit() { WSACleanup(); }
+#else
     int socket;
     bool isValid() const { return socket >= 0; }
     void close() { close(socket); }
     static int getLastError() { return errno; }
     static bool init() { return true; }
     static bool deInit() {}
-};
 #endif
+    _socket_t socket;
+
+    Socket() = default;
+    Socket(_socket_t the_socket)
+        :socket(the_socket)
+    {}
+};
+
 
 #endif // SOCKET_202212071931
