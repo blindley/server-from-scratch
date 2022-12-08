@@ -34,12 +34,12 @@ struct Socket {
 
     static void deInit() { WSACleanup(); }
 #else
-    int socket;
+    typedef int _socket_t;
     bool isValid() const { return socket >= 0; }
-    void close() { close(socket); }
+    void close() { ::close(socket); }
     static int getLastError() { return errno; }
     static bool init() { return true; }
-    static bool deInit() {}
+    static void deInit() {}
 #endif
     _socket_t socket;
 
